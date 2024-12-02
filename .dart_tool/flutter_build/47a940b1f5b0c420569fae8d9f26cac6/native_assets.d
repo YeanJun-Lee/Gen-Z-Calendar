@@ -1,0 +1,1 @@
+ /Users/kimsojin/development/gen_z_calendar/.dart_tool/flutter_build/47a940b1f5b0c420569fae8d9f26cac6/native_assets.yaml: 
