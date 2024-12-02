@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 
+<<<<<<< Updated upstream
 void main() {
+=======
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp(
+  // options: DefaultFirebaseOptions.currentPlatform,
+  // ); // Firebase 초기화
+>>>>>>> Stashed changes
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+<<<<<<< Updated upstream
   // This widget is the root of your application.
+=======
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,6 +42,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+<<<<<<< Updated upstream
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -120,6 +132,17 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+=======
+      initialRoute: '/', // 앱 시작 시 표시될 초기 화면
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginScreen(), // 로그인 화면
+        '/home': (context) => const HomeScreen(), // 홈 화면
+        '/signup': (context) => const SignupScreen(), // 회원가입 화면
+        '/find': (context) => const FindCredentialsScreen(), // 아이디/비밀번호 찾기 라우트 추가
+        'notification': (context) => const NotificationScreen(), // 알림 화면
+      },
+>>>>>>> Stashed changes
     );
   }
 }
