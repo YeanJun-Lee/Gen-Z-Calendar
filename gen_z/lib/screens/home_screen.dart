@@ -6,6 +6,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('홈 화면'),
@@ -13,18 +15,14 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              try {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login'); // 로그인 화면으로 이동
-              } catch (e) {
-                print("로그아웃 실패: $e");
-              }
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacementNamed(context, '/login'); // 로그인 화면으로 이동
             },
           ),
         ],
       ),
-      body: const Center(
-        child: Text('로그인 성공! 홈 화면입니다.'),
+      body: Center(
+        child: Text('환영합니다, ${user?.email}님!'),
       ),
     );
   }
