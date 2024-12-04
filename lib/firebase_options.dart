@@ -41,48 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA_j1DQGiYfc87lrCGb4ZPTbd4tz-66c8U',
-    appId: '1:571914832172:web:8242ab930fc6c10f414489',
-    messagingSenderId: '571914832172',
-    projectId: 'gen-z-35474',
-    authDomain: 'gen-z-35474.firebaseapp.com',
-    storageBucket: 'gen-z-35474.firebasestorage.app',
-    measurementId: 'G-DLWSFV54MW',
+    apiKey: 'AIzaSyA0akmlHMcGJVvhxn88NfIPLjn7rPjEiOU',
+    appId: '1:1000727123535:web:9bc8449af75e8b87ab3c3a',
+    messagingSenderId: '1000727123535',
+    projectId: 'gen-z-calendar',
+    authDomain: 'gen-z-calendar.firebaseapp.com',
+    storageBucket: 'gen-z-calendar.firebasestorage.app',
+    measurementId: 'G-SY46GTN63P',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDdQxZmu_rKHzPzpL7560y0OeqvTPDhyks',
-    appId: '1:571914832172:android:8c064a313f970b40414489',
-    messagingSenderId: '571914832172',
-    projectId: 'gen-z-35474',
-    storageBucket: 'gen-z-35474.firebasestorage.app',
+    apiKey: 'AIzaSyBkqogeU-fF8_28ok2ILsF-QzT7dFOXCqM',
+    appId: '1:1000727123535:android:ee6c6acf554b7d17ab3c3a',
+    messagingSenderId: '1000727123535',
+    projectId: 'gen-z-calendar',
+    storageBucket: 'gen-z-calendar.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAj0zp5UFEtZUgo6P_lEh7dzNPg7aKdRjU',
-    appId: '1:571914832172:ios:3e40773e41e738f4414489',
-    messagingSenderId: '571914832172',
-    projectId: 'gen-z-35474',
-    storageBucket: 'gen-z-35474.firebasestorage.app',
+    apiKey: 'AIzaSyA1xinHdjVxhitQGq5IB8iloGhAyqpH_SU',
+    appId: '1:1000727123535:ios:cfc9b7c61f716af8ab3c3a',
+    messagingSenderId: '1000727123535',
+    projectId: 'gen-z-calendar',
+    storageBucket: 'gen-z-calendar.firebasestorage.app',
     iosBundleId: 'com.example.genZCalendar',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAj0zp5UFEtZUgo6P_lEh7dzNPg7aKdRjU',
-    appId: '1:571914832172:ios:3e40773e41e738f4414489',
-    messagingSenderId: '571914832172',
-    projectId: 'gen-z-35474',
-    storageBucket: 'gen-z-35474.firebasestorage.app',
+    apiKey: 'AIzaSyA1xinHdjVxhitQGq5IB8iloGhAyqpH_SU',
+    appId: '1:1000727123535:ios:cfc9b7c61f716af8ab3c3a',
+    messagingSenderId: '1000727123535',
+    projectId: 'gen-z-calendar',
+    storageBucket: 'gen-z-calendar.firebasestorage.app',
     iosBundleId: 'com.example.genZCalendar',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA_j1DQGiYfc87lrCGb4ZPTbd4tz-66c8U',
-    appId: '1:571914832172:web:4e909d0050d0a907414489',
-    messagingSenderId: '571914832172',
-    projectId: 'gen-z-35474',
-    authDomain: 'gen-z-35474.firebaseapp.com',
-    storageBucket: 'gen-z-35474.firebasestorage.app',
-    measurementId: 'G-3BVNLFBZPB',
+    apiKey: 'AIzaSyA0akmlHMcGJVvhxn88NfIPLjn7rPjEiOU',
+    appId: '1:1000727123535:web:ac03911fcad58fa7ab3c3a',
+    messagingSenderId: '1000727123535',
+    projectId: 'gen-z-calendar',
+    authDomain: 'gen-z-calendar.firebaseapp.com',
+    storageBucket: 'gen-z-calendar.firebasestorage.app',
+    measurementId: 'G-YFHRM3NQHV',
   );
 }

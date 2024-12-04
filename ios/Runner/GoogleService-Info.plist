@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAj0zp5UFEtZUgo6P_lEh7dzNPg7aKdRjU</string>
+	<string>AIzaSyA1xinHdjVxhitQGq5IB8iloGhAyqpH_SU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>571914832172</string>
+	<string>1000727123535</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.genZCalendar</string>
 	<key>PROJECT_ID</key>
-	<string>gen-z-35474</string>
+	<string>gen-z-calendar</string>
 	<key>STORAGE_BUCKET</key>
-	<string>gen-z-35474.firebasestorage.app</string>
+	<string>gen-z-calendar.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:571914832172:ios:3e40773e41e738f4414489</string>
+	<string>1:1000727123535:ios:cfc9b7c61f716af8ab3c3a</string>
 </dict>
 </plist>

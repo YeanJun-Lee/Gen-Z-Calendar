@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:gen_z_calendar/cell_calendar/cell_calendar.dart';
-import 'package:gen_z_calendar/sample_event.dart';
+import 'package:cell_calendar/cell_calendar.dart';
+import 'package:gen_z_calendar/add_schedule_screen.dart';
+import 'package:gen_z_calendar/bottom_section.dart';
+import 'package:gen_z_calendar/friend_management_screen.dart';
+import 'package:gen_z_calendar/group_creation_screen.dart';
+import 'package:gen_z_calendar/mypage_screen.dart';
+import 'package:gen_z_calendar/notification_screen.dart';
 import 'package:intl/intl.dart';
-import 'add_schedule_screen.dart'; // 일정 추가 화면 import
-import 'notification_screen.dart'; // 알림 화면 import
-import 'mypage_screen.dart'; // 마이페이지 화면 import
-import 'group_creation_screen.dart'; // 그룹 관리 화면 import
-import 'friend_management_screen.dart'; // 친구 관리 화면 import
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final events = sampleEvents();
-    final cellCalendarPageController = CellCalendarPageController();
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  final cellCalendarPageController = CellCalendarPageController();
+
+  // 초기 BottomSection 높이
+  double _bottomSheetHeight = 200.0;
+
+  DateTime? _selectedDate;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -37,11 +46,13 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications, color: Color(0xFF1D3557)), // 진한 파란색
+            icon: const Icon(Icons.notifications,
+                color: Color(0xFF1D3557)), // 진한 파란색
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const NotificationScreen()),
               ); // 알림 화면으로 이동
             },
           ),
@@ -66,7 +77,6 @@ class HomeScreen extends StatelessWidget {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              // Drawer 상단 헤더
               const DrawerHeader(
                 decoration: BoxDecoration(
                   color: Color(0xFF1D3557), // 진한 파란색 배경
@@ -80,8 +90,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // 메뉴 항목들
               ListTile(
                 leading: const Icon(Icons.group, color: Colors.black),
                 title: const Text('공유 그룹 관리'),
@@ -135,105 +143,87 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Column(
-            children: [
-              // 상단 캘린더 영역
-              Expanded(
-                child: CellCalendar(
-                  cellCalendarPageController: cellCalendarPageController,
-                  events: events,
-                  daysOfTheWeekBuilder: (dayIndex) {
-                    final labels = ["S", "M", "T", "W", "T", "F", "S"];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        labels[dayIndex],
+          // 상단 캘린더
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 700, // 캘린더 고정 높이
+            child: CellCalendar(
+              cellCalendarPageController: cellCalendarPageController,
+              daysOfTheWeekBuilder: (dayIndex) {
+                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                return Center(
+                  child: Text(
+                    days[dayIndex],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                );
+              },
+              monthYearLabelBuilder: (datetime) {
+                final year = datetime?.year.toString();
+                final month = DateFormat.MMMM().format(datetime!);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      Text(
+                        "$month $year",
                         style: const TextStyle(
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    );
-                  },
-                  monthYearLabelBuilder: (datetime) {
-                    final year = datetime!.year.toString();
-                    final month = datetime.month.monthName;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 16),
-                          Text(
-                            "$month  $year",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.calendar_today),
-                            onPressed: () {
-                              cellCalendarPageController.animateToDate(
-                                DateTime.now(),
-                                curve: Curves.linear,
-                                duration: const Duration(milliseconds: 300),
-                              );
-                            },
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  onCellTapped: (date) {
-                    final eventsOnTheDate = events.where((event) {
-                      final eventDate = event.eventDate;
-                      return eventDate.year == date.year &&
-                          eventDate.month == date.month &&
-                          eventDate.day == date.day;
-                    }).toList();
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: Text("${date.month.monthName} ${date.day}"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: eventsOnTheDate
-                              .map(
-                                (event) => Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(4),
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  color: event.eventBackgroundColor,
-                                  child: Text(
-                                    event.eventName,
-                                    style: event.eventTextStyle,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    );
-                  },
-                  onPageChanged: (firstDate, lastDate) {
-                    /// Called when the page was changed
-                    /// Fetch additional events by using the range between [firstDate] and [lastDate] if you want
-                  },
-                ),
-              ),
-              // 하단 영역
-              Container(
-                height: 150, // 명시적으로 높이를 설정
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(color: Colors.grey[300]!),
+                    ],
                   ),
+                );
+              },
+              onCellTapped: (date) {
+                final tappedDate = date;
+                setState(() {
+                  _selectedDate = tappedDate;
+                });
+              },
+            ),
+          ),
+          // 드래그 가능한 BottomSection
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                setState(() {
+                  _bottomSheetHeight -= details.delta.dy; // 드래그에 따라 높이 변경
+                  if (_bottomSheetHeight < 200)
+                    _bottomSheetHeight = 150; // 최소 높이
+                  if (_bottomSheetHeight >
+                      MediaQuery.of(context).size.height * 0.8) {
+                    _bottomSheetHeight =
+                        MediaQuery.of(context).size.height * 0.8; // 최대 높이
+                  }
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                height: _bottomSheetHeight,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -247,93 +237,23 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        children: [
-                          const Row(
-                            children: [
-                              Text(
-                                '내 일정',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 16.0),
-                              Text('그룹 일정'),
-                            ],
+                      child: Center(
+                        child: Text(
+                          _selectedDate != null
+                              ? "선택된 날짜: ${DateFormat('MM-dd').format(_selectedDate!)}"
+                              : "날짜를 선택해주세요",
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 16.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: const Center(
-                                    child: Text('일정 1'),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8.0),
-                              Expanded(
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: const Center(
-                                    child: Text('일정 2'),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          // 오른쪽 아래의 추가 버튼
-          Positioned(
-            bottom: 16.0,
-            right: 16.0,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddScheduleScreen()),
-                ); // 일정 추가 화면으로 이동
-              },
-              child: Container(
-                width: 56.0, // 버튼 크기
-                height: 56.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF1D3557), // 버튼 배경색 (진한 파란색)
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 6.0,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 30.0,
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

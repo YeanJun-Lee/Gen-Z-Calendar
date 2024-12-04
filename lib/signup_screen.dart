@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignupScreenState createState() => _SignupScreenState();
 }
 
@@ -16,6 +16,49 @@ class _SignupScreenState extends State<SignupScreen> {
       TextEditingController();
 
   bool isChecked = false;
+  String errorMessage = ''; // 에러 메시지를 표시하기 위한 변수
+
+  Future<void> registerUser() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      setState(() {
+        errorMessage = '비밀번호가 일치하지 않습니다.';
+      });
+      return;
+    }
+
+    try {
+      // Firebase Authentication을 이용한 회원가입
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      // 추가 사용자 정보 저장 (ex: DisplayName)
+      await userCredential.user?.updateDisplayName(usernameController.text);
+
+      setState(() {
+        errorMessage = '회원가입 성공: ${userCredential.user?.email}';
+      });
+
+      // 회원가입 성공 후 로그인 화면으로 이동
+      Navigator.pushReplacementNamed(context, '/login');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'email-already-in-use') {
+          errorMessage = '이미 사용 중인 이메일입니다.';
+        } else if (e.code == 'weak-password') {
+          errorMessage = '비밀번호는 최소 6자 이상이어야 합니다.';
+        } else {
+          errorMessage = '오류 발생: ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = '오류 발생: $e';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,33 +72,32 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black), // 뒤로가기 버튼을 검정색으로
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // 이전 화면으로 돌아가기
+            Navigator.pop(context);
           },
         ),
-        backgroundColor: Colors.white, // AppBar 배경색을 흰색으로 설정
-        elevation: 0, // AppBar 그림자 제거
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
-      backgroundColor: Colors.white, // 전체 배경색을 흰색으로 설정
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 프로필 이미지 추가 버튼
             Center(
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
                   const CircleAvatar(
                     radius: 50.0,
-                    backgroundColor: Color(0xFF1D3557), // 진한 파란색 배경
+                    backgroundColor: Color(0xFF1D3557),
                     child: Icon(
                       Icons.person,
                       size: 50.0,
-                      color: Color(0xFFCCCCCC), // 사람 아이콘을 밝은 회색으로 설정
+                      color: Color(0xFFCCCCCC),
                     ),
                   ),
                   IconButton(
@@ -63,14 +105,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       // 프로필 이미지 추가 로직
                     },
                     icon: const Icon(Icons.camera_alt),
-                    color: Colors.white, // 카메라 아이콘을 흰색으로 설정
+                    color: Colors.white,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24.0),
 
-            // 사용자명 입력 필드
             TextField(
               controller: usernameController,
               decoration: InputDecoration(
@@ -82,7 +123,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // 이메일 입력 필드
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -94,7 +134,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // 비밀번호 입력 필드
             TextField(
               controller: passwordController,
               obscureText: true,
@@ -107,7 +146,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // 비밀번호 확인 입력 필드
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
@@ -120,7 +158,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // 약관 동의 체크박스
             Row(
               children: [
                 Checkbox(
@@ -142,15 +179,14 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // 회원가입 버튼
             ElevatedButton(
               onPressed: isChecked
                   ? () {
-                      // 회원가입 로직 추가
+                      registerUser(); // 회원가입 로직 호출
                     }
-                  : null, // 체크박스가 선택되지 않으면 버튼 비활성화
+                  : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D3557), // 버튼 색상: 진한 파란색
+                backgroundColor: const Color(0xFF1D3557),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -160,6 +196,17 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: TextStyle(fontSize: 18.0, color: Colors.white),
               ),
             ),
+
+            // 에러 메시지 출력
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red, fontSize: 14.0),
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
       ),

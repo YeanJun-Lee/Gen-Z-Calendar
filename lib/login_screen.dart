@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
@@ -12,26 +12,37 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // 더미 데이터: 로그인 테스트용 이메일과 비밀번호
-  final String dummyEmail = 'hansung@naver.com';
-  final String dummyPassword = 'hansung';
+  String errorMessage = ''; // 오류 메시지를 저장하는 변수
 
   // 로그인 함수
-  void login() {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+  Future<void> login() async {
+    try {
+      String email = emailController.text.trim();
+      String password = passwordController.text.trim();
 
-    if (email == dummyEmail && password == dummyPassword) {
-      // 로그인 성공
-      Navigator.pushReplacementNamed(context, '/home'); // 홈 화면으로 이동
-    } else {
-      // 로그인 실패
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('아이디 또는 비밀번호가 잘못되었습니다.'),
-          backgroundColor: Colors.red,
-        ),
+      // Firebase Authentication 로그인
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+
+      // 로그인 성공 시 홈 화면으로 이동
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      // Firebase 로그인 오류 처리
+      setState(() {
+        if (e.code == 'user-not-found') {
+          errorMessage = '등록되지 않은 이메일입니다.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = '비밀번호가 올바르지 않습니다.';
+        } else {
+          errorMessage = '오류 발생: ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = '오류 발생: $e';
+      });
     }
   }
 
@@ -41,11 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text(
           '로그인',
-          style: TextStyle(color: Colors.white), // 글씨를 흰색으로
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF1D3557), // 진한 파란색
+        backgroundColor: const Color(0xFF1D3557),
       ),
-      backgroundColor: Colors.white, // 전체 화면 배경을 흰색으로 설정
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -62,7 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               onSubmitted: (_) {
-                // Enter 키 입력 시 포커스를 비밀번호 필드로 이동
                 FocusScope.of(context).nextFocus();
               },
             ),
@@ -79,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               onSubmitted: (_) {
-                // Enter 키 입력 시 로그인 함수 호출
                 login();
               },
             ),
@@ -89,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               onPressed: login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D3557), // 진한 파란색
+                backgroundColor: const Color(0xFF1D3557),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -99,16 +108,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16.0),
               ),
             ),
+
+            // 오류 메시지 출력
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red, fontSize: 14.0),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             const SizedBox(height: 16.0),
 
-            // 회원가입 버튼과 아이디/비밀번호 찾기 버튼 나란히 배치
+            // 회원가입과 아이디/비밀번호 찾기
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // 회원가입 버튼
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/signup'); // 회원가입 화면으로 이동
+                    Navigator.pushNamed(context, '/signup');
                   },
                   child: const Text(
                     '회원가입',
@@ -118,8 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // 아이디/비밀번호 찾기 버튼
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(
-                        context, '/find'); // 아이디/비밀번호 찾기 화면으로 이동
+                    Navigator.pushNamed(context, '/find');
                   },
                   child: const Text(
                     '아이디/비밀번호 찾기',
