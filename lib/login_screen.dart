@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'invalid-credential':
         return '아이디(이메일) 및 비밀번호가 올바르지 않습니다.';
       case 'invalid-email':
-        return '이메일 형식이 잘못되었습니다.';
+        return '아이디(이메일)을 제대로 입력해주세요.';
       case 'too-many-requests':
         return '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.';
       default:
