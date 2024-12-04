@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', // 앱 시작 시 표시될 초기 화면
       routes: {
-        '/': (context) => const SplashScreen(),
+        '/': (context) => SplashScreen(),
         '/login': (context) => const LoginScreen(), // 로그인 화면
         '/home': (context) => const HomeScreen(), // 홈 화면
         '/signup': (context) => const SignupScreen(), // 회원가입 화면

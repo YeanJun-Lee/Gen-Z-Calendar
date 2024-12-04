@@ -227,18 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      width: 50,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[400],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
                     Expanded(
-                      child: Center(
-                        child: Text(
+                      child: Stack(
+                        children: [ Text(
                           _selectedDate != null
                               ? "선택된 날짜: ${DateFormat('MM-dd').format(_selectedDate!)}"
                               : "날짜를 선택해주세요",
@@ -247,6 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        BottomSection(
+                          selectedDate: _selectedDate,
+                          ),
+                        ],
                       ),
                     ),
                   ],
