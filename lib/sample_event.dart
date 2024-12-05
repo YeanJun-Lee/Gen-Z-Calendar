@@ -1,5 +1,5 @@
+import 'package:cell_calendar/cell_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:gen_z_calendar/cell_calendar/cell_calendar.dart';
 
 List<CalendarEvent> sampleEvents() {
   final today = DateTime.now();

@@ -31,29 +31,18 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       // Firebase 로그인 오류 처리
       setState(() {
-        errorMessage = _getErrorMessage(e.code);
-        print('FirebaseAuth Error: ${e.code}');
+        if (e.code == 'user-not-found') {
+          errorMessage = '등록되지 않은 이메일입니다.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = '비밀번호가 올바르지 않습니다.';
+        } else {
+          errorMessage = '오류 발생: ${e.message}';
+        }
       });
     } catch (e) {
       setState(() {
-        errorMessage = '알 수 없는 오류 발생: $e';
+        errorMessage = '오류 발생: $e';
       });
-    }
-  }
-
-  // 오류 메시지 반환 함수
-  String _getErrorMessage(String errorCode) {
-    switch (errorCode) {
-      case 'missing-password':
-        return '비밀번호를 입력해주세요.';
-      case 'invalid-credential':
-        return '아이디(이메일) 및 비밀번호가 올바르지 않습니다.';
-      case 'invalid-email':
-        return '아이디(이메일)을 제대로 입력해주세요.';
-      case 'too-many-requests':
-        return '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.';
-      default:
-        return '오류 발생: 알 수 없는 이유로 로그인할 수 없습니다.';
     }
   }
 

@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'gen-z-calendar.firebasestorage.app',
     measurementId: 'G-YFHRM3NQHV',
   );
-
 }
