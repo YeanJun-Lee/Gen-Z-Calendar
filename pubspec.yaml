@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cloud_firestore: 5.5.1
   intl: ^0.18.0
   syncfusion_flutter_calendar: ^27.2.5
 
