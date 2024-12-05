@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
 import 'package:gen_z_calendar/friend_management_screen.dart';
 import 'package:gen_z_calendar/group_creation_screen.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
+import 'package:gen_z_calendar/sample_event.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final cellCalendarPageController = CellCalendarPageController();
+  final events = sampleEvents();
 
   // 초기 BottomSection 높이
   double _bottomSheetHeight = 200.0;
@@ -154,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 700, // 캘린더 고정 높이
             child: CellCalendar(
               cellCalendarPageController: cellCalendarPageController,
+              events: events,
               daysOfTheWeekBuilder: (dayIndex) {
                 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 return Center(
@@ -178,6 +182,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const Spacer(),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () {
+                          cellCalendarPageController.animateToDate(
+                            DateTime.now(),
+                            curve: Curves.linear,
+                            duration: const Duration(milliseconds: 300),
+                          );
+                        },
+                      )
                     ],
                   ),
                 );
@@ -246,9 +262,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                ),
               ),
             ),
+          ),
         ],
       ),
     );
