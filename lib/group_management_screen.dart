@@ -49,7 +49,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
           .get();
 
       setState(() {
-        _friends = snapshot.docs.map((doc) => doc.id).toList();
+        _friends = snapshot.docs.map((doc) => doc['email'] as String).toList();
       });
     } catch (e) {
       print('Error loading friends: $e');
@@ -152,7 +152,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
   }
 
   // 멤버 추가 다이얼로그
-  void _showAddMemberDialog(int groupIndex) {
+  void _showAddMemberDialog(String groupId) {
     final TextEditingController memberController = TextEditingController();
 
     showDialog(
@@ -174,31 +174,44 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
               child: const Text('취소'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 final String newMember = memberController.text.trim();
 
+                // 입력 유효성 검사
                 if (newMember.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('아이디/이메일을 입력하세요.')),
+                    const SnackBar(content: Text('이메일을 입력해주세요.')),
                   );
-                } else if (!_friends.contains(newMember)) {
-                  // 친구 목록에 없는 사용자일 경우
+                  return;
+                }
+
+                // 친구 목록 확인
+                if (!_friends.contains(newMember)) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('해당 사용자는 친구 목록에 없습니다.')),
                   );
-                } else if (_groups[groupIndex]['members'].contains(newMember)) {
-                  // 이미 멤버로 추가된 경우
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('이미 그룹에 추가된 사용자입니다.')),
-                  );
-                } else {
-                  // 친구 목록에 있는 사용자만 추가
-                  setState(() {
-                    _groups[groupIndex]['members'].add(newMember);
-                  });
-                  _saveGroups();
-                  Navigator.pop(context);
+                  return;
                 }
+
+                try {
+                  // Firestore에서 그룹 업데이트
+                  await FirebaseFirestore.instance
+                      .collection('groups')
+                      .doc(groupId)
+                      .update({
+                    'members': FieldValue.arrayUnion([newMember]),
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('멤버가 추가되었습니다.')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('오류 발생: $e')),
+                  );
+                }
+
+                Navigator.pop(context);
               },
               child: const Text('추가'),
             ),
@@ -331,7 +344,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
                   ),
                   subtitle: Text(group['description']!,
                       style: const TextStyle(color: Colors.grey)),
-                  onTap: () {
+                  onTap: () async {
                     // 그룹 상세 정보 화면으로 이동
                     Navigator.push(
                       context,
@@ -339,6 +352,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
                         builder: (context) => GroupDetailScreen(group: group),
                       ),
                     );
+                    await _loadGroups();
                   },
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -346,7 +360,8 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
                       IconButton(
                         icon: const Icon(Icons.add_circle, color: Colors.blue),
                         onPressed: () {
-                          _showAddMemberDialog(index); // 멤버 추가 다이얼로그 호출
+                          _showAddMemberDialog(
+                              _filteredGroups[index]['id']); // 멤버 추가 다이얼로그 호출
                         },
                       ),
                       IconButton(
