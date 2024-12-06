@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GroupCreationScreen extends StatefulWidget {
-  const GroupCreationScreen({super.key, required String userId});
+  const GroupCreationScreen({super.key});
 
   @override
   _GroupCreationScreenState createState() => _GroupCreationScreenState();
@@ -17,76 +16,7 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
   final TextEditingController _groupDescriptionController =
       TextEditingController();
 
-  List<String> _friendEmails = []; // 친구 이메일 목록
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchFriends(); // 친구 목록 가져오기
-
-    // 현재 로그인된 사용자 이메일을 기본 멤버로 추가
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && !_members.contains(user.email)) {
-      _members.add(user.email!);
-    }
-  }
-
-  // Firestore에서 친구 이메일 목록 가져오기
-  Future<void> _fetchFriends() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('friends')
-          .get();
-
-      setState(() {
-        _friendEmails =
-            snapshot.docs.map((doc) => doc['email'] as String).toList();
-      });
-    } catch (e) {
-      print('친구 목록 가져오기 오류: $e');
-    }
-  }
-
   // 그룹 생성 함수
-  Future<void> _createGroupInFirestore(String groupName, String groupCode,
-      String groupDescription, List<String> members) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('사용자가 로그인되어 있지 않습니다.');
-      }
-
-      if (!members.contains(user.email)) {
-        members.add(user.email!); // 현재 로그인된 사용자를 멤버에 추가
-      }
-
-      // 새로운 그룹을 Firestore의 groups 컬렉션에 저장
-      final groupRef = FirebaseFirestore.instance.collection('groups').doc();
-      await groupRef.set({
-        'name': groupName,
-        'code': groupCode,
-        'description': groupDescription,
-        'members': members,
-        'createdAt': FieldValue.serverTimestamp(),
-        'owner': user.email, // 그룹 생성자
-      });
-
-      // 그룹 생성 성공 메시지
-      _showGroupCreatedDialog(groupName, groupDescription);
-    } catch (e) {
-      print('Error creating group: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('그룹 생성 중 오류 발생: $e')),
-      );
-    }
-  }
-
-  // 그룹 생성 성공 다이얼로그
   void _showGroupCreatedDialog(String groupName, String groupDescription) {
     showDialog(
       context: context,
@@ -98,7 +28,10 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // 팝업 닫기
-                Navigator.pop(context); // 이전 화면으로 이동
+                Navigator.pop(context, {
+                  'name': groupName,
+                  'description': groupDescription,
+                }); // 그룹 데이터를 반환하며 이전 화면으로 이동
               },
               child: const Text('확인'),
             ),
@@ -108,37 +41,33 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
     );
   }
 
-  // 친구만 멤버로 추가
+  // Firestore에 그룹 추가
+  Future<void> _createGroupInFirestore(String groupName, String groupCode,
+      String groupDescription, List<String> members) async {
+    try {
+      final groupRef = FirebaseFirestore.instance.collection('groups').doc();
+
+      await groupRef.set({
+        'name': groupName,
+        'code': groupCode,
+        'description': groupDescription,
+        'members': members,
+        'createdAt': FieldValue.serverTimestamp(), // 그룹 생성 시간을 기록
+      });
+      _showGroupCreatedDialog(groupName, groupDescription);
+    } catch (e) {
+      print('Error creating group: $e');
+    }
+  }
+
   void _addMember() {
     final String newMember = _memberController.text.trim();
-
-    if (newMember.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('멤버 이메일을 입력해주세요.')),
-      );
-      return;
+    if (newMember.isNotEmpty) {
+      setState(() {
+        _members.add(newMember);
+        _memberController.clear(); // 입력 필드 초기화
+      });
     }
-
-    // 입력된 이메일이 친구 목록에 포함되어 있는지 확인
-    if (!_friendEmails.contains(newMember)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('입력한 이메일은 친구 목록에 없습니다.')),
-      );
-      return;
-    }
-
-    // 이미 추가된 멤버인지 확인
-    if (_members.contains(newMember)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미 추가된 멤버입니다.')),
-      );
-      return;
-    }
-
-    setState(() {
-      _members.add(newMember); // 멤버 추가
-      _memberController.clear(); // 입력 필드 초기화
-    });
   }
 
   Widget _buildRow(String label, Widget inputWidget) {
@@ -151,13 +80,13 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
             padding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
             decoration: BoxDecoration(
-              color: const Color(0xFF1D3557),
-              borderRadius: BorderRadius.circular(16.0),
+              color: Color(0xFF1D3557), // 진한 파란색 배경
+              borderRadius: BorderRadius.circular(16.0), // 둥근 모서리
             ),
             child: Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.white, // 흰색 텍스트
                 fontWeight: FontWeight.bold,
                 fontSize: 14.0,
               ),
@@ -174,25 +103,25 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0.0,
+        titleSpacing: 0.0, // 제목을 왼쪽 정렬
         title: const Text(
           '공유 그룹 생성',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
-            fontSize: 18.0,
+            fontSize: 18.0, // 글씨 크기 조정
           ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // 이전 화면으로 이동
           },
         ),
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 0, // 그림자 제거
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // 바디 배경색 흰색으로 설정
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -301,6 +230,7 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
                     _createGroupInFirestore(
                         groupName, groupCode, groupDescription, _members);
                   } else {
+                    // 모든 필드가 입력되지 않았을 경우
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('모든 항목을 입력해주세요.')),
                     );

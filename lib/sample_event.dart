@@ -87,7 +87,7 @@ List<CalendarEvent> sampleEvents() {
     ),
     CalendarEvent(
       eventName: "Have lunch with Mike",
-      eventDate: today.add(const Duration(days: 13)),
+      eventDate: today.add(const Duration(days: 12)),
       eventBackgroundColor: Colors.green,
       eventTextStyle: eventTextStyle,
     ),
@@ -95,13 +95,6 @@ List<CalendarEvent> sampleEvents() {
       eventName: "Buy new Play Station software",
       eventDate: today.add(const Duration(days: 13)),
       eventBackgroundColor: Colors.indigoAccent,
-      eventTextStyle: eventTextStyle,
-    ),
-    CalendarEvent(
-      eventName: "Update my flutter package",
-      eventDate: today.add(
-        const Duration(days: 13),
-      ),
       eventTextStyle: eventTextStyle,
     ),
     CalendarEvent(

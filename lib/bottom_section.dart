@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gen_z_calendar/daywidget.dart';
+import 'package:gen_z_calendar/personal_schedule_add.dart';
 import 'package:intl/intl.dart';
 import 'package:kalender/kalender.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
@@ -75,16 +76,6 @@ class _BottomSectionState extends State<BottomSection> {
               ),
             ),
           ),
-          Text(
-            selectedDate != null
-                ? "${DateFormat('yyyy-MM-dd').format(selectedDate)}"
-                : "날짜를 선택해주세요",
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
           // Expanded(
           //   child: ListView(
           //     children: [
@@ -116,8 +107,8 @@ class _BottomSectionState extends State<BottomSection> {
           //     ],
           //   ),
           // ),
-          const Expanded(
-            child: Daywidget(),
+          Expanded(
+            child: Daywidget(selectedDate: widget.selectedDate ?? DateTime.now(),),
           ),
           // 일정 추가 버튼
           Align(
@@ -131,7 +122,17 @@ class _BottomSectionState extends State<BottomSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const AddScheduleScreen(),
+                      child: PersonalScheduleAdd(
+                        onAddEvent: (newEvent) {
+                          setState(() {
+                            // 이벤트 데이터를 리스트에 추가
+                            mySchedules.add({
+                              'date': newEvent.dateTimeRange.start,
+                              'title': newEvent.eventData?.title ?? 'New Event',
+                            });
+                          });
+                        },
+                      ),
                     );
                   },
                 );

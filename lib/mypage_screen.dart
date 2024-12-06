@@ -33,55 +33,54 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   // Update user display name
-Future<void> _updateUserInfo() async {
-  String newUsername = usernameController.text.trim();
-  String newPassword = passwordController.text.trim();
+  Future<void> _updateUserInfo() async {
+    String newUsername = usernameController.text.trim();
+    String newPassword = passwordController.text.trim();
 
-  if (newUsername.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('사용자명을 입력하세요.'),
-        backgroundColor: Colors.red,
-      ),
-    );
-    return;
-  }
-
-  try {
-    // Update display name in Firebase Authentication
-    await currentUser?.updateDisplayName(newUsername);
-
-    // Update password if provided
-    if (newPassword.isNotEmpty) {
-      await currentUser?.updatePassword(newPassword);
+    if (newUsername.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('사용자명을 입력하세요.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
 
-    // Update name in Firestore
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser?.uid)
-        .update({'name': newUsername});
+    try {
+      // Update display name in Firebase Authentication
+      await currentUser?.updateDisplayName(newUsername);
 
-    // Reload user to reflect changes
-    await currentUser?.reload();
-    _loadUserInfo();
+      // Update password if provided
+      if (newPassword.isNotEmpty) {
+        await currentUser?.updatePassword(newPassword);
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('회원 정보가 성공적으로 수정되었습니다.'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } on FirebaseAuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('회원 정보 수정 실패: ${e.message}'),
-        backgroundColor: Colors.red,
-      ),
-    );
+      // Update name in Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser?.uid)
+          .update({'name': newUsername});
+
+      // Reload user to reflect changes
+      await currentUser?.reload();
+      _loadUserInfo();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('회원 정보가 성공적으로 수정되었습니다.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('회원 정보 수정 실패: ${e.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

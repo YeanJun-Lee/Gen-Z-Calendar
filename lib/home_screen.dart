@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
 import 'package:gen_z_calendar/friend_management_screen.dart';
 import 'package:gen_z_calendar/group_creation_screen.dart';
-import 'package:gen_z_calendar/group_management_screen.dart';
+import 'package:gen_z_calendar/group_managment_screen.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
 import 'package:gen_z_calendar/sample_event.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,136 +41,100 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Color(0xFF1D3557)),
+            icon: const Icon(Icons.menu, color: Color(0xFF1D3557)), // 진한 파란색
             onPressed: () {
-              Scaffold.of(context).openDrawer();
+              Scaffold.of(context).openDrawer(); // Drawer 열기
             },
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications, color: Color(0xFF1D3557)),
+            icon: const Icon(Icons.notifications,
+                color: Color(0xFF1D3557)), // 진한 파란색
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const NotificationScreen(),
-                ),
-              );
+                    builder: (context) => const NotificationScreen()),
+              ); // 알림 화면으로 이동
             },
           ),
           IconButton(
             icon: const CircleAvatar(
               radius: 15,
-              backgroundColor: Color(0xFF1D3557),
+              backgroundColor: Color(0xFF1D3557), // 진한 파란색
               child: Icon(Icons.person, size: 20.0, color: Colors.white),
             ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const MyPageScreen(),
-                ),
-              );
+                MaterialPageRoute(builder: (context) => const MyPageScreen()),
+              ); // 마이페이지 화면으로 이동
             },
           ),
         ],
       ),
       drawer: Drawer(
-        child: Container(
-          color: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color(0xFF1D3557),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Color(0xFF1D3557)),
+              child: Text(
+                'Gen-Z Calendar\nmenu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: Text(
-                  'Gen-Z Calendar\nmenu',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.group, color: Colors.black),
+              title: const Text('공유 그룹 관리'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GroupManagementScreen()
                   ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.group, color: Colors.black),
-                title: const Text('공유 그룹 관리'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const GroupManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.star, color: Colors.black),
-                title: const Text('공유 일정 생성'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddScheduleScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.person_add, color: Colors.black),
-                title: const Text('친구 관리'),
-                onTap: () {
-                  final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-
-                  if (userId.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            FriendManagementScreen(userId: userId),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('로그인이 필요합니다.'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_today, color: Colors.black),
-                title: const Text('캘린더 확인'),
-                onTap: () {
-                  // 캘린더 확인 화면 이동 로직
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.sync, color: Colors.black),
-                title: const Text('캘린더 연동'),
-                trailing:
-                    const Icon(Icons.account_circle, color: Colors.blue),
-                onTap: () {
-                  // 캘린더 연동 화면 이동 로직
-                },
-              ),
-            ],
-          ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star, color: Colors.black),
+              title: const Text('공유 일정 생성'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AddScheduleScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_add, color: Colors.black),
+              title: const Text('친구 관리'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FriendManagementScreen(userId: 'nhlee0918@naver.com',)),
+                );
+              },
+            ),
+          ],
         ),
       ),
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: Stack(
         children: [
+          // 상단 캘린더
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: 700,
+            height: 700, // 캘린더 고정 높이
             child: CellCalendar(
               cellCalendarPageController: cellCalendarPageController,
               events: events,
@@ -224,6 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
+          // 드래그 가능한 BottomSection
           Positioned(
             bottom: 0,
             left: 0,
@@ -231,13 +194,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
                 setState(() {
-                  _bottomSheetHeight -= details.delta.dy;
-                  if (_bottomSheetHeight < 200) _bottomSheetHeight = 150;
-                  if (_bottomSheetHeight >
-                      MediaQuery.of(context).size.height * 0.8) {
-                    _bottomSheetHeight =
-                        MediaQuery.of(context).size.height * 0.8;
-                  }
+                  _bottomSheetHeight -= details.delta.dy; // 드래그에 따라 높이 변경
+                  _bottomSheetHeight = _bottomSheetHeight.clamp(
+                    212.0, 
+                    MediaQuery.of(context).size.height * 0.8
+                  );
                 });
               },
               child: AnimatedContainer(
@@ -249,30 +210,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, -2),
-                    ),
-                  ],
                 ),
                 child: Column(
                   children: [
                     Expanded(
                       child: Stack(
-                        children: [
-                          Text(
-                            _selectedDate != null
-                                ? "선택된 날짜: ${DateFormat('MM-dd').format(_selectedDate!)}"
-                                : "날짜를 선택해주세요",
-                            style: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        children: [ Text(
+                          _selectedDate != null
+                              ? "선택된 날짜: ${DateFormat('MM-dd').format(_selectedDate!)}"
+                              : "날짜를 선택해주세요",
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
                           ),
-                          BottomSection(
-                            selectedDate: _selectedDate,
+                        ),
+                        BottomSection(
+                          selectedDate: _selectedDate,
                           ),
                         ],
                       ),

@@ -33,9 +33,8 @@ class _FriendManagementScreenState extends State<FriendManagementScreen> {
           .get();
 
       setState(() {
-        friends = snapshot.docs
-            .map((doc) => {"id": doc.id, ...doc.data()})
-            .toList();
+        friends =
+            snapshot.docs.map((doc) => {"id": doc.id, ...doc.data()}).toList();
       });
     } catch (e) {
       print('친구 목록 가져오기 오류: $e');
@@ -226,63 +225,65 @@ class _FriendManagementScreenState extends State<FriendManagementScreen> {
           const SizedBox(height: 16.0),
           // 친구 목록
           Expanded(
-  child: Theme(
-    data: Theme.of(context).copyWith(
-      popupMenuTheme: const PopupMenuThemeData(
-        color: Colors.white, // 팝업 메뉴 배경색
-        textStyle: TextStyle(color: Colors.black), // 텍스트 색상
-      ),
-    ),
-    child: ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      itemCount: friends.length, // friends 리스트의 길이 사용
-      separatorBuilder: (context, index) => Divider(color: Colors.grey[300]),
-      itemBuilder: (context, index) {
-        final friend = friends[index];
-        
-        // 데이터 null 처리 및 기본값 설정
-        final String name = friend['name'] ?? '이름 없음';
-        final String email = friend['email'] ?? '이메일 없음';
-        final String image = friend['image'] ?? ''; // null일 경우 빈 문자열
-        
-        return ListTile(
-          leading: CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.grey[300],
-            child: image.isNotEmpty
-                ? Image.asset(image) // `image` 값이 있으면 Asset 이미지 사용
-                : const Icon(Icons.person, color: Colors.white), // 기본 아이콘 사용
-          ),
-          title: Text(
-            name,
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                popupMenuTheme: const PopupMenuThemeData(
+                  color: Colors.white, // 팝업 메뉴 배경색
+                  textStyle: TextStyle(color: Colors.black), // 텍스트 색상
+                ),
+              ),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                itemCount: friends.length, // friends 리스트의 길이 사용
+                separatorBuilder: (context, index) =>
+                    Divider(color: Colors.grey[300]),
+                itemBuilder: (context, index) {
+                  final friend = friends[index];
+
+                  // 데이터 null 처리 및 기본값 설정
+                  final String name = friend['name'] ?? '이름 없음';
+                  final String email = friend['email'] ?? '이메일 없음';
+                  final String image = friend['image'] ?? ''; // null일 경우 빈 문자열
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.grey[300],
+                      child: image.isNotEmpty
+                          ? Image.asset(image) // `image` 값이 있으면 Asset 이미지 사용
+                          : const Icon(Icons.person,
+                              color: Colors.white), // 기본 아이콘 사용
+                    ),
+                    title: Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      email,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    trailing: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.grey),
+                      onSelected: (value) {
+                        if (value == 'delete') {
+                          _deleteFriend(friend['id']); // 친구 삭제 함수 호출
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('친구 삭제'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-          subtitle: Text(
-            email,
-            style: const TextStyle(color: Colors.grey),
-          ),
-          trailing: PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.grey),
-            onSelected: (value) {
-              if (value == 'delete') {
-                _deleteFriend(friend['id']); // 친구 삭제 함수 호출
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'delete',
-                child: Text('친구 삭제'),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  ),
-),
 
           // 친구 추가 버튼
           Padding(
