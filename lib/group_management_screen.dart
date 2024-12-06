@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'group_creation_screen.dart';
+import 'group_detail_screen.dart';
 
 class GroupManagementScreen extends StatefulWidget {
   const GroupManagementScreen({super.key});
@@ -11,9 +12,9 @@ class GroupManagementScreen extends StatefulWidget {
 }
 
 class _GroupManagementScreenState extends State<GroupManagementScreen> {
-  final List<Map<String, String>> _groups = [];
+  final List<Map<String, dynamic>> _groups = [];
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, String>> _filteredGroups = [];
+  List<Map<String, dynamic>> _filteredGroups = [];
 
   User? _user; // 로그인된 사용자 정보
   late String _userId; // Firebase 사용자 ID
@@ -39,11 +40,15 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
   // 그룹 추가 함수
   void _addGroup(String groupName, String groupDescription) {
     setState(() {
-      final newGroup = {'name': groupName, 'description': groupDescription};
+      final newGroup = {
+        'name': groupName,
+        'description': groupDescription,
+        'members': [],
+      };
       _groups.add(newGroup);
       _filteredGroups = _groups;
     });
-    _saveGroups(); // 그룹 저장
+    _saveGroups(); // Firestore에 저장
   }
 
   // 그룹 삭제 함수
@@ -52,7 +57,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
       _groups.removeAt(index);
       _filteredGroups = _groups;
     });
-    _saveGroups(); // 그룹 저장
+    _saveGroups(); // Firestore에 저장
   }
 
   // 그룹 저장 함수 (Firestore에 저장)
@@ -79,7 +84,7 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
           _groups.clear();
           _filteredGroups.clear();
           for (var group in userGroups) {
-            _groups.add(Map<String, String>.from(group));
+            _groups.add(Map<String, dynamic>.from(group));
           }
           _filteredGroups = _groups;
         });
@@ -99,6 +104,47 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
             .toList();
       }
     });
+  }
+
+  // 멤버 추가 다이얼로그
+  void _showAddMemberDialog(int groupIndex) {
+    final TextEditingController memberController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('멤버 추가'),
+          content: TextField(
+            controller: memberController,
+            decoration: const InputDecoration(
+              hintText: '아이디/이메일 입력',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                final String newMember = memberController.text.trim();
+                if (newMember.isNotEmpty) {
+                  setState(() {
+                    _groups[groupIndex]['members'].add(newMember);
+                  });
+                  _saveGroups();
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('추가'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -222,11 +268,31 @@ class _GroupManagementScreenState extends State<GroupManagementScreen> {
                   ),
                   subtitle: Text(group['description']!,
                       style: const TextStyle(color: Colors.grey)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.grey),
-                    onPressed: () {
-                      _deleteGroup(index); // 그룹 삭제
-                    },
+                  onTap: () {
+                    // 그룹 상세 정보 화면으로 이동
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GroupDetailScreen(group: group),
+                      ),
+                    );
+                  },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.blue),
+                        onPressed: () {
+                          _showAddMemberDialog(index); // 멤버 추가 다이얼로그 호출
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.grey),
+                        onPressed: () {
+                          _deleteGroup(index); // 그룹 삭제
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
