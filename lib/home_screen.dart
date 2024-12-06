@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
-import 'package:gen_z_calendar/add_schedule_screen.dart';
-import 'package:gen_z_calendar/bottom_section.dart';
-import 'package:gen_z_calendar/mypage_screen.dart';
-import 'package:gen_z_calendar/notification_screen.dart';
 import 'package:intl/intl.dart';
 
+import 'add_schedule_screen.dart';
+import 'bottom_section.dart';
 import 'friend_management_screen.dart';
 import 'group_managment_screen.dart';
+import 'mypage_screen.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,38 +21,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final cellCalendarPageController = CellCalendarPageController();
-  List<CalendarEvent> _events = []; // 캘린더 이벤트 리스트
   double _bottomSheetHeight = 200.0; // 초기 BottomSection 높이
   DateTime? _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEvents();
-  }
-
-  Future<void> _loadEvents() async {
-    try {
-      final snapshot =
-          await FirebaseFirestore.instance.collection('schedules').get();
-
-      setState(() {
-        _events = snapshot.docs.map((doc) {
-          final data = doc.data();
-          return CalendarEvent(
-            eventName: data['title'] ?? 'No Title',
-            eventDate: (data['date'] is Timestamp)
-                ? data['date'].toDate()
-                : DateTime.parse(data['date']),
-            eventBackgroundColor: Colors.blue, // 기본 배경색
-            eventTextStyle: const TextStyle(fontSize: 10, color: Colors.white),
-          );
-        }).toList();
-      });
-    } catch (e) {
-      print('Firestore 이벤트 로드 오류: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,56 +135,81 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
+          // 상단 캘린더
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             height: 700,
-            child: CellCalendar(
-              cellCalendarPageController: cellCalendarPageController,
-              events: _events, // Firestore에서 가져온 이벤트 전달
-              daysOfTheWeekBuilder: (dayIndex) {
-                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                return Center(
-                  child: Text(
-                    days[dayIndex],
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                );
-              },
-              monthYearLabelBuilder: (datetime) {
-                final year = datetime?.year.toString();
-                final month = DateFormat.MMMM().format(datetime!);
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      Text(
-                        "$month $year",
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('schedules')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final events = snapshot.data!.docs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  return CalendarEvent(
+                    eventName: data['title'] ?? 'No Title',
+                    eventDate: (data['date'] is Timestamp)
+                        ? data['date'].toDate()
+                        : DateTime.parse(data['date']),
+                    eventBackgroundColor: Colors.blue, // 기본 배경색
+                    eventTextStyle:
+                        const TextStyle(fontSize: 10, color: Colors.white),
+                  );
+                }).toList();
+
+                return CellCalendar(
+                  cellCalendarPageController: cellCalendarPageController,
+                  events: events,
+                  daysOfTheWeekBuilder: (dayIndex) {
+                    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                    return Center(
+                      child: Text(
+                        days[dayIndex],
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.calendar_today),
-                        onPressed: () {
-                          cellCalendarPageController.animateToDate(
-                            DateTime.now(),
-                            curve: Curves.linear,
-                            duration: const Duration(milliseconds: 300),
-                          );
-                        },
-                      )
-                    ],
-                  ),
+                    );
+                  },
+                  monthYearLabelBuilder: (datetime) {
+                    final year = datetime?.year.toString();
+                    final month = DateFormat.MMMM().format(datetime!);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 16),
+                          Text(
+                            "$month $year",
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.calendar_today),
+                            onPressed: () {
+                              cellCalendarPageController.animateToDate(
+                                DateTime.now(),
+                                curve: Curves.linear,
+                                duration: const Duration(milliseconds: 300),
+                              );
+                            },
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  onCellTapped: (date) {
+                    setState(() {
+                      _selectedDate = date;
+                    });
+                  },
                 );
-              },
-              onCellTapped: (date) {
-                setState(() {
-                  _selectedDate = date;
-                });
               },
             ),
           ),
@@ -242,8 +237,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     topRight: Radius.circular(16),
                   ),
                 ),
-                child:
-                    BottomSection(selectedDate: _selectedDate, events: _events),
+                child: BottomSection(
+                  selectedDate: _selectedDate,
+                  events: [],
+                ),
               ),
             ),
           ),
