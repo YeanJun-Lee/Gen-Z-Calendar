@@ -93,7 +93,7 @@ class _BottomSectionState extends State<BottomSection> {
           // ),
           Expanded(
             child: Daywidget(
-              selectedDate: widget.selectedDate ?? DateTime.now(),
+              selectedDate: selectedDate
             ),
           ),
           // 일정 추가 버튼

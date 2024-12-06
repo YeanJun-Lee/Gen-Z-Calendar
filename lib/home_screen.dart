@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
-import 'package:gen_z_calendar/event.dart';
 import 'package:gen_z_calendar/friend_management_screen.dart';
 import 'package:gen_z_calendar/group_managment_screen.dart';
+import 'package:gen_z_calendar/insert_event.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
-import 'package:gen_z_calendar/sample_event.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,20 +21,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final cellCalendarPageController = CellCalendarPageController();
-  final List<Event> _event = [
-    Event(
-      title: '기본 이벤트',
-      startTime: '10:00 AM',
-      endTime: '11:00 AM',
-      description: '기본 일정 설명',
-      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-    ),
-  ];
+  final events = sampleEvents();
 
   // 초기 BottomSection 높이
-  double _bottomSheetHeight = 200.0;
+  double _bottomSheetHeight = 250.0;
 
   DateTime? _selectedDate;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // 1초마다 selectedDate를 현재 시간으로 갱신
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _selectedDate = DateTime.now();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // 타이머 해제
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 700, // 캘린더 고정 높이
             child: CellCalendar(
               cellCalendarPageController: cellCalendarPageController,
+              events: events,
               daysOfTheWeekBuilder: (dayIndex) {
                 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 return Center(
@@ -218,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {
                   _bottomSheetHeight -= details.delta.dy; // 드래그에 따라 높이 변경
                   _bottomSheetHeight = _bottomSheetHeight.clamp(
-                    212.0, 
+                    250.0, 
                     MediaQuery.of(context).size.height * 0.8
                   );
                 });

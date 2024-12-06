@@ -23,10 +23,8 @@ class _DayWidgetState extends State<Daywidget> {
 
   late ViewConfiguration currentConfiguration = viewConfigurations[0];
   List<ViewConfiguration> viewConfigurations = [
-    CustomMultiDayConfiguration(
-      name: 'Day',
-      numberOfDays: 2,
-      showWeekNumber: false,
+    WeekConfiguration(
+      showWeekNumber: false
     ),
   ];
 

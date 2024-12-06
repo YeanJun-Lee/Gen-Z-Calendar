@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 3)); // 2초 대기
+    await Future.delayed(const Duration(seconds: 2)); // 2초 대기
     if (mounted) {
     Navigator.pushReplacementNamed(context, '/login'); // 로그인 화면으로 이동
     }
