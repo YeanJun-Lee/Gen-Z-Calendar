@@ -1,40 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:gen_z_calendar/daywidget.dart';
+import 'package:gen_z_calendar/event.dart';
 import 'package:gen_z_calendar/personal_schedule_add.dart';
 import 'package:intl/intl.dart';
-import 'package:kalender/kalender.dart';
-import 'package:gen_z_calendar/add_schedule_screen.dart';
 
 class BottomSection extends StatefulWidget {
   final DateTime? selectedDate;
+  final List<dynamic> events;
 
-  const BottomSection({super.key, required this.selectedDate});
+  const BottomSection({super.key, required this.selectedDate, required this.events});
 
   @override
   State<BottomSection> createState() => _BottomSectionState();
 }
 
 class _BottomSectionState extends State<BottomSection> {
-  final CalendarController controller = CalendarController(
-    calendarDateTimeRange: DateTimeRange(
-      start: DateTime(DateTime.now().year - 1),
-      end: DateTime(DateTime.now().year + 1),
-    ),
-  );
-
   final List<Map<String, dynamic>> mySchedules = [
     {'date': DateTime(2024, 12, 25), 'title': '크리스마스 준비'},
     {'date': DateTime(2024, 12, 31), 'title': '연말 모임'},
   ];
 
-  final List<Map<String, dynamic>> sharedSchedules = [
-    {'date': DateTime(2024, 12, 25), 'title': '회사 송년회'},
-    {'date': DateTime(2024, 12, 30), 'title': '프로젝트 회의'},
-  ];
-
   @override
   Widget build(BuildContext context) {
     final DateTime? selectedDate = widget.selectedDate;
+
+    // 선택된 날짜에 해당하는 일정 필터링
+    final myFilteredSchedules = selectedDate != null
+        ? mySchedules
+            .where((schedule) =>
+                DateFormat('yyyy-MM-dd').format(schedule['date']) ==
+                DateFormat('yyyy-MM-dd').format(selectedDate))
+            .toList()
+        : [];
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -60,40 +57,9 @@ class _BottomSectionState extends State<BottomSection> {
               ),
             ),
           ),
-          // Expanded(
-          //   child: ListView(
-          //     children: [
-          //       const Text(
-          //         '내 일정',
-          //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          //       ),
-          //       const SizedBox(height: 8),
-          //       ...myFilteredSchedules.map((schedule) {
-          //         return ListTile(
-          //           leading: const Icon(Icons.person),
-          //           title: Text(schedule['title']),
-          //         );
-          //       }).toList(),
-          //       if (myFilteredSchedules.isEmpty) const Text('내 일정이 없습니다.'),
-          //       const SizedBox(height: 16),
-          //       const Text(
-          //         '공유 일정',
-          //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          //       ),
-          //       const SizedBox(height: 8),
-          //       ...sharedFilteredSchedules.map((schedule) {
-          //         return ListTile(
-          //           leading: const Icon(Icons.group),
-          //           title: Text(schedule['title']),
-          //         );
-          //       }).toList(),
-          //       if (sharedFilteredSchedules.isEmpty) const Text('공유 일정이 없습니다.'),
-          //     ],
-          //   ),
-          // ),
           Expanded(
             child: Daywidget(
-              selectedDate: selectedDate
+              selectedDate: widget.selectedDate ?? DateTime.now(),
             ),
           ),
           // 일정 추가 버튼
@@ -111,10 +77,10 @@ class _BottomSectionState extends State<BottomSection> {
                       child: PersonalScheduleAdd(
                         onAddEvent: (newEvent) {
                           setState(() {
-                            // 이벤트 데이터를 리스트에 추가
+                            // 새로운 이벤트 추가
                             mySchedules.add({
-                              'date': newEvent.dateTimeRange.start,
-                              'title': newEvent.eventData?.title ?? 'New Event',
+                              'date': DateTime.parse(newEvent.date),
+                              'title': newEvent.title,
                             });
                           });
                         },

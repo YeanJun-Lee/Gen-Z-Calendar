@@ -23,27 +23,30 @@ class _DayWidgetState extends State<Daywidget> {
 
   late ViewConfiguration currentConfiguration = viewConfigurations[0];
   List<ViewConfiguration> viewConfigurations = [
-    WeekConfiguration(
-      showWeekNumber: false
+    CustomMultiDayConfiguration(
+      name: 'Day',
+      numberOfDays: 2,
+      showWeekNumber: false,
     ),
   ];
 
   DateTime? dateTime;
-
+  
   get selectedDate => null;
 
   @override
   void initState() {
     super.initState();
-    dateTime = widget.selectedDate;
-    final futureDate = dateTime?.add(Duration(days: 30 * 365));
+      dateTime = widget.selectedDate;
+      final futureDate = dateTime?.add(Duration(days: 30 * 365));
 
-    controller = CalendarController(
-      initialDate: dateTime,
-      calendarDateTimeRange: DateTimeRange(
+      controller = CalendarController(
+        initialDate: dateTime,
+        calendarDateTimeRange: DateTimeRange(
           start: DateTime(dateTime!.year - 1, dateTime!.month, dateTime!.day),
-          end: DateTime(futureDate!.year, futureDate!.month, futureDate!.day)),
-    );
+          end: DateTime(futureDate!.year, futureDate!.month, futureDate!.day)
+        ),
+      );
   }
 
   @override
@@ -71,6 +74,7 @@ class _DayWidgetState extends State<Daywidget> {
   CalendarEvent<Event> _onCreateEvent(DateTimeRange dateTimeRange) {
     return CalendarEvent(
       dateTimeRange: dateTimeRange,
+      
     );
   }
 
