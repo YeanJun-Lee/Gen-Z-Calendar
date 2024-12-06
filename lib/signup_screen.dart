@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -34,8 +35,19 @@ class _SignupScreenState extends State<SignupScreen> {
         password: passwordController.text.trim(),
       );
 
-      // 추가 사용자 정보 저장 (ex: DisplayName)
-      await userCredential.user?.updateDisplayName(usernameController.text);
+      final userId =
+          userCredential.user!.uid; // Firebase Authentication의 userId 가져오기
+
+      // Firebase Authentication의 displayName 설정
+      await userCredential.user
+          ?.updateDisplayName(usernameController.text.trim());
+
+      // Firestore에 사용자 정보 저장
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'name': usernameController.text.trim(),
+        'email': emailController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(), // 서버 타임스탬프 저장
+      });
 
       setState(() {
         errorMessage = '회원가입 성공: ${userCredential.user?.email}';

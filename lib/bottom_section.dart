@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gen_z_calendar/daywidget.dart';
+import 'package:gen_z_calendar/personal_schedule_add.dart';
 import 'package:intl/intl.dart';
 import 'package:kalender/kalender.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
@@ -131,7 +132,17 @@ class _BottomSectionState extends State<BottomSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const AddScheduleScreen(),
+                      child: PersonalScheduleAdd(
+                        onAddEvent: (newEvent) {
+                          setState(() {
+                            // 이벤트 데이터를 리스트에 추가
+                            mySchedules.add({
+                              'date': newEvent.dateTimeRange.start,
+                              'title': newEvent.eventData?.title ?? 'New Event',
+                            });
+                          });
+                        },
+                      ),
                     );
                   },
                 );

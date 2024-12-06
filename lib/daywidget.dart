@@ -50,8 +50,6 @@ class _DayWidgetState extends State<Daywidget> {
       eventHandlers: CalendarEventHandlers(
         onEventTapped: _onEventTapped,
         onEventChanged: _onEventChanged,
-        onCreateEvent: _onCreateEvent,
-        onEventCreated: _onEventCreated,
       ),
     );
 
