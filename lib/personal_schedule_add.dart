@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:gen_z_calendar/event.dart';
-import 'package:kalender/kalender.dart';
+import 'event.dart';
 
 class PersonalScheduleAdd extends StatefulWidget {
-  final Function(CalendarEvent<Event>) onAddEvent;
+  final Function(Event) onAddEvent;
 
   const PersonalScheduleAdd({Key? key, required this.onAddEvent})
       : super(key: key);
@@ -14,11 +13,33 @@ class PersonalScheduleAdd extends StatefulWidget {
 }
 
 class _PersonalScheduleAddState extends State<PersonalScheduleAdd> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
+
+  void _saveSchedule() {
+    if (_titleController.text.isNotEmpty &&
+        _selectedDate != null &&
+        _startTime != null &&
+        _endTime != null) {
+      final event = Event(
+        title: _titleController.text,
+        startTime: _startTime!.format(context),
+        endTime: _endTime!.format(context),
+        description: _descriptionController.text,
+        date: DateFormat('yyyy-MM-dd').format(_selectedDate!),
+      );
+
+      widget.onAddEvent(event);
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('모든 필드를 올바르게 입력해주세요.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,23 +53,19 @@ class _PersonalScheduleAddState extends State<PersonalScheduleAdd> {
           },
         ),
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 제목 입력
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(
                 labelText: '제목',
-                prefixIcon: Icon(Icons.title),
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
-
-            // 날짜 선택
             GestureDetector(
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
@@ -66,73 +83,66 @@ class _PersonalScheduleAddState extends State<PersonalScheduleAdd> {
               child: InputDecorator(
                 decoration: const InputDecoration(
                   labelText: '날짜',
-                  prefixIcon: Icon(Icons.calendar_today),
                   border: OutlineInputBorder(),
                 ),
                 child: Text(
                   _selectedDate == null
-                      ? '날짜를 선택해주세요'
+                      ? '날짜를 선택하세요'
                       : DateFormat('yyyy-MM-dd').format(_selectedDate!),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
-            // 시작 시간 & 종료 시간
             Row(
               children: [
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
-                      TimeOfDay? picked = await showTimePicker(
+                      TimeOfDay? pickedTime = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay.now(),
                       );
-                      if (picked != null) {
+                      if (pickedTime != null) {
                         setState(() {
-                          _startTime = picked;
+                          _startTime = pickedTime;
                         });
                       }
                     },
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         labelText: '시작 시간',
-                        prefixIcon: Icon(Icons.access_time),
                         border: OutlineInputBorder(),
                       ),
                       child: Text(
                         _startTime == null
-                            ? '선택되지 않음'
+                            ? '시작 시간을 선택하세요'
                             : _startTime!.format(context),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward),
-                const SizedBox(width: 8),
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
-                      TimeOfDay? picked = await showTimePicker(
+                      TimeOfDay? pickedTime = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay.now(),
                       );
-                      if (picked != null) {
+                      if (pickedTime != null) {
                         setState(() {
-                          _endTime = picked;
+                          _endTime = pickedTime;
                         });
                       }
                     },
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         labelText: '종료 시간',
-                        prefixIcon: Icon(Icons.access_time),
                         border: OutlineInputBorder(),
                       ),
                       child: Text(
                         _endTime == null
-                            ? '선택되지 않음'
+                            ? '종료 시간을 선택하세요'
                             : _endTime!.format(context),
                       ),
                     ),
@@ -141,8 +151,6 @@ class _PersonalScheduleAddState extends State<PersonalScheduleAdd> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // 설명 입력
             TextField(
               controller: _descriptionController,
               decoration: const InputDecoration(
@@ -151,48 +159,12 @@ class _PersonalScheduleAddState extends State<PersonalScheduleAdd> {
               ),
               maxLines: 3,
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _saveSchedule,
+              child: const Text('일정 저장'),
+            ),
           ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () {
-            if (_titleController.text.isNotEmpty &&
-                _selectedDate != null &&
-                _startTime != null &&
-                _endTime != null) {
-              final event = CalendarEvent<Event>(
-                dateTimeRange: DateTimeRange(
-                  start: DateTime(
-                    _selectedDate!.year,
-                    _selectedDate!.month,
-                    _selectedDate!.day,
-                    _startTime!.hour,
-                    _startTime!.minute,
-                  ),
-                  end: DateTime(
-                    _selectedDate!.year,
-                    _selectedDate!.month,
-                    _selectedDate!.day,
-                    _endTime!.hour,
-                    _endTime!.minute,
-                  ),
-                ),
-                eventData: Event(
-                  title: _titleController.text,
-                  description: _descriptionController.text, dateTimeRange: null,
-                ),
-              );
-              widget.onAddEvent(event);
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('필수 항목을 모두 입력해주세요.')),
-              );
-            }
-          },
-          child: const Text('완료'),
         ),
       ),
     );

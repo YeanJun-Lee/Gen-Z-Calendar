@@ -1,9 +1,12 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
+import 'package:gen_z_calendar/event.dart';
 import 'package:gen_z_calendar/friend_management_screen.dart';
-import 'package:gen_z_calendar/group_creation_screen.dart';
 import 'package:gen_z_calendar/group_managment_screen.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
@@ -19,7 +22,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final cellCalendarPageController = CellCalendarPageController();
-  final events = sampleEvents();
+  final List<Event> _event = [
+    Event(
+      title: '기본 이벤트',
+      startTime: '10:00 AM',
+      endTime: '11:00 AM',
+      description: '기본 일정 설명',
+      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+    ),
+  ];
 
   // 초기 BottomSection 높이
   double _bottomSheetHeight = 200.0;
@@ -116,11 +127,23 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.person_add, color: Colors.black),
               title: const Text('친구 관리'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const FriendManagementScreen(userId: 'nhlee0918@naver.com',)),
-                );
+                final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                if (userId.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          FriendManagementScreen(userId: userId),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('로그인이 필요합니다.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
             ),
           ],
@@ -137,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 700, // 캘린더 고정 높이
             child: CellCalendar(
               cellCalendarPageController: cellCalendarPageController,
-              events: events,
               daysOfTheWeekBuilder: (dayIndex) {
                 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 return Center(
@@ -240,3 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+      
+      
+  
+
