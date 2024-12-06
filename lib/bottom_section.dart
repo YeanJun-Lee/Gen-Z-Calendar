@@ -36,22 +36,6 @@ class _BottomSectionState extends State<BottomSection> {
   Widget build(BuildContext context) {
     final DateTime? selectedDate = widget.selectedDate;
 
-    final myFilteredSchedules = selectedDate != null
-        ? mySchedules
-            .where((schedule) =>
-                DateFormat('yyyy-MM-dd').format(schedule['date']) ==
-                DateFormat('yyyy-MM-dd').format(selectedDate))
-            .toList()
-        : [];
-
-    final sharedFilteredSchedules = selectedDate != null
-        ? sharedSchedules
-            .where((schedule) =>
-                DateFormat('yyyy-MM-dd').format(schedule['date']) ==
-                DateFormat('yyyy-MM-dd').format(selectedDate))
-            .toList()
-        : [];
-
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: const BoxDecoration(
@@ -108,7 +92,9 @@ class _BottomSectionState extends State<BottomSection> {
           //   ),
           // ),
           Expanded(
-            child: Daywidget(selectedDate: widget.selectedDate ?? DateTime.now(),),
+            child: Daywidget(
+              selectedDate: widget.selectedDate ?? DateTime.now(),
+            ),
           ),
           // 일정 추가 버튼
           Align(
