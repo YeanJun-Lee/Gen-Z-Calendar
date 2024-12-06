@@ -22,14 +22,9 @@ Gen-Z Calendar는 사용자들이 개인 및 공유 캘린더를 통해 일정�
 - 중요한 일정 알림 및 변경 사항 알림
 - 개인화된 알림 방식 설정
 
-5. 캘린더 동기화 및 연동
-- Google Calendar 연동
-- 실시간 동기화로 일정 변경 반영
-
 ## 프로젝트 구조
 - 프론트엔드: Flutter
-- 백엔드: Firebase와 Google Calendar API
-- 데이터베이스: MySQL
+- 백엔드: Firebase
 - 지원 플랫폼: Android, iOS
 
 ## 화면 구성
@@ -74,7 +69,6 @@ Gen-Z Calendar는 사용자들이 개인 및 공유 캘린더를 통해 일정�
 - 언어: Dart
 - 프레임워크: Flutter
 - 백엔드: Firebase
-- API: Google Calendar API
 - 툴: Android Studio, Xcode, Visual Studio Code
 
 ## 설치 및 실행 방법
