@@ -76,16 +76,6 @@ class _BottomSectionState extends State<BottomSection> {
               ),
             ),
           ),
-          Text(
-            selectedDate != null
-                ? "${DateFormat('yyyy-MM-dd').format(selectedDate)}"
-                : "날짜를 선택해주세요",
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
           // Expanded(
           //   child: ListView(
           //     children: [
@@ -117,8 +107,8 @@ class _BottomSectionState extends State<BottomSection> {
           //     ],
           //   ),
           // ),
-          const Expanded(
-            child: Daywidget(),
+          Expanded(
+            child: Daywidget(selectedDate: widget.selectedDate ?? DateTime.now(),),
           ),
           // 일정 추가 버튼
           Align(

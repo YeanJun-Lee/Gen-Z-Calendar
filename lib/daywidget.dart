@@ -7,19 +7,17 @@ import 'package:gen_z_calendar/event.dart';
 import 'package:kalender/kalender.dart';
 
 class Daywidget extends StatefulWidget {
-  const Daywidget({super.key});
+  final DateTime? selectedDate;
+
+  const Daywidget({super.key, required this.selectedDate});
 
   @override
   State<Daywidget> createState() => _DayWidgetState();
 }
 
 class _DayWidgetState extends State<Daywidget> {
-  final CalendarController<Event> controller = CalendarController(
-    calendarDateTimeRange: DateTimeRange(
-      start: DateTime(DateTime.now().year - 1),
-      end: DateTime(DateTime.now().year + 1),
-    ),
-  );
+  late final CalendarController<Event> controller;
+
   final CalendarEventsController<Event> eventController =
       CalendarEventsController<Event>();
 
@@ -28,14 +26,27 @@ class _DayWidgetState extends State<Daywidget> {
     CustomMultiDayConfiguration(
       name: 'Day',
       numberOfDays: 2,
+      showWeekNumber: false,
     ),
   ];
 
+  DateTime? dateTime;
+  
+  get selectedDate => null;
+
   @override
   void initState() {
-    super.initState(
-      
-    );
+    super.initState();
+      dateTime = widget.selectedDate;
+      final futureDate = dateTime?.add(Duration(days: 30 * 365));
+
+      controller = CalendarController(
+        initialDate: dateTime,
+        calendarDateTimeRange: DateTimeRange(
+          start: DateTime(dateTime!.year - 1, dateTime!.month, dateTime!.day),
+          end: DateTime(futureDate!.year, futureDate!.month, futureDate!.day)
+        ),
+      );
   }
 
   @override
@@ -170,7 +181,7 @@ class _DayWidgetState extends State<Daywidget> {
         ),
         IconButton.filledTonal(
           onPressed: () {
-            controller.animateToDate(DateTime.now());
+            controller.animateToDate(selectedDate!);
           },
           icon: const Icon(Icons.today),
         ),
