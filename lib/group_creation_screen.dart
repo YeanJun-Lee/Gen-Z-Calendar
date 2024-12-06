@@ -1,19 +1,23 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class GroupCreationScreen extends StatefulWidget {
   const GroupCreationScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _GroupCreationScreenState createState() => _GroupCreationScreenState();
 }
 
 class _GroupCreationScreenState extends State<GroupCreationScreen> {
+  final TextEditingController _groupNameController = TextEditingController();
+  final TextEditingController _groupCodeController = TextEditingController();
   final TextEditingController _memberController = TextEditingController();
   final List<String> _members = [];
+  final TextEditingController _groupDescriptionController =
+      TextEditingController();
 
   // 그룹 생성 함수
-  void _showGroupCreatedDialog() {
+  void _showGroupCreatedDialog(String groupName, String groupDescription) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -24,7 +28,10 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // 팝업 닫기
-                Navigator.pop(context); // 이전 화면으로 이동
+                Navigator.pop(context, {
+                  'name': groupName,
+                  'description': groupDescription,
+                }); // 그룹 데이터를 반환하며 이전 화면으로 이동
               },
               child: const Text('확인'),
             ),
@@ -32,6 +39,25 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
         );
       },
     );
+  }
+
+  // Firestore에 그룹 추가
+  Future<void> _createGroupInFirestore(String groupName, String groupCode,
+      String groupDescription, List<String> members) async {
+    try {
+      final groupRef = FirebaseFirestore.instance.collection('groups').doc();
+
+      await groupRef.set({
+        'name': groupName,
+        'code': groupCode,
+        'description': groupDescription,
+        'members': members,
+        'createdAt': FieldValue.serverTimestamp(), // 그룹 생성 시간을 기록
+      });
+      _showGroupCreatedDialog(groupName, groupDescription);
+    } catch (e) {
+      print('Error creating group: $e');
+    }
   }
 
   void _addMember() {
@@ -51,7 +77,8 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
             decoration: BoxDecoration(
               color: Color(0xFF1D3557), // 진한 파란색 배경
               borderRadius: BorderRadius.circular(16.0), // 둥근 모서리
@@ -105,6 +132,7 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
               _buildRow(
                 '그룹명',
                 TextField(
+                  controller: _groupNameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -117,6 +145,7 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
               _buildRow(
                 '그룹 코드',
                 TextField(
+                  controller: _groupCodeController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -144,7 +173,8 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
                     const SizedBox(width: 8.0),
                     IconButton(
                       onPressed: _addMember,
-                      icon: const Icon(Icons.add_circle, color: Color(0xFF1D3557)),
+                      icon: const Icon(Icons.add_circle,
+                          color: Color(0xFF1D3557)),
                     ),
                   ],
                 ),
@@ -175,6 +205,7 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
               _buildRow(
                 '그룹 소개',
                 TextField(
+                  controller: _groupDescriptionController,
                   maxLines: 5,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -188,14 +219,31 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
 
               // 생성하기 버튼
               ElevatedButton(
-                onPressed: _showGroupCreatedDialog, // 팝업창 표시
+                onPressed: () {
+                  final groupName = _groupNameController.text.trim();
+                  final groupCode = _groupCodeController.text.trim();
+                  final groupDescription =
+                      _groupDescriptionController.text.trim();
+                  if (groupName.isNotEmpty &&
+                      groupCode.isNotEmpty &&
+                      groupDescription.isNotEmpty) {
+                    _createGroupInFirestore(
+                        groupName, groupCode, groupDescription, _members);
+                  } else {
+                    // 모든 필드가 입력되지 않았을 경우
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('모든 항목을 입력해주세요.')),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D3557),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: const Text('생성하기', style: TextStyle(color: Colors.white)),
+                child:
+                    const Text('생성하기', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

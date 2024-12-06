@@ -5,6 +5,7 @@ import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
 import 'package:gen_z_calendar/friend_management_screen.dart';
 import 'package:gen_z_calendar/group_creation_screen.dart';
+import 'package:gen_z_calendar/group_management_screen.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
 import 'package:gen_z_calendar/sample_event.dart';
@@ -103,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const GroupCreationScreen(),
+                      builder: (context) => const GroupManagementScreen(),
                     ),
                   );
                 },
