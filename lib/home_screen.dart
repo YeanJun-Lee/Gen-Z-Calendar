@@ -1,17 +1,16 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cell_calendar/cell_calendar.dart';
 import 'package:gen_z_calendar/add_schedule_screen.dart';
 import 'package:gen_z_calendar/bottom_section.dart';
-import 'package:gen_z_calendar/event.dart';
-import 'package:gen_z_calendar/friend_management_screen.dart';
-import 'package:gen_z_calendar/group_managment_screen.dart';
 import 'package:gen_z_calendar/mypage_screen.dart';
 import 'package:gen_z_calendar/notification_screen.dart';
-import 'package:gen_z_calendar/sample_event.dart';
 import 'package:intl/intl.dart';
+
+import 'friend_management_screen.dart';
+import 'group_managment_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,20 +21,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final cellCalendarPageController = CellCalendarPageController();
-  final List<Event> _event = [
-    Event(
-      title: '기본 이벤트',
-      startTime: '10:00 AM',
-      endTime: '11:00 AM',
-      description: '기본 일정 설명',
-      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-    ),
-  ];
-
-  // 초기 BottomSection 높이
-  double _bottomSheetHeight = 200.0;
-
+  List<CalendarEvent> _events = []; // 캘린더 이벤트 리스트
+  double _bottomSheetHeight = 200.0; // 초기 BottomSection 높이
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('schedules').get();
+
+      setState(() {
+        _events = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return CalendarEvent(
+            eventName: data['title'] ?? 'No Title',
+            eventDate: (data['date'] is Timestamp)
+                ? data['date'].toDate()
+                : DateTime.parse(data['date']),
+            eventBackgroundColor: Colors.blue, // 기본 배경색
+            eventTextStyle: const TextStyle(fontSize: 10, color: Colors.white),
+          );
+        }).toList();
+      });
+    } catch (e) {
+      print('Firestore 이벤트 로드 오류: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Color(0xFF1D3557)), // 진한 파란색
+            icon: const Icon(Icons.menu, color: Color(0xFF1D3557)),
             onPressed: () {
               Scaffold.of(context).openDrawer(); // Drawer 열기
             },
@@ -60,27 +77,26 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications,
-                color: Color(0xFF1D3557)), // 진한 파란색
+            icon: const Icon(Icons.notifications, color: Color(0xFF1D3557)),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const NotificationScreen()),
-              ); // 알림 화면으로 이동
+              );
             },
           ),
           IconButton(
             icon: const CircleAvatar(
               radius: 15,
-              backgroundColor: Color(0xFF1D3557), // 진한 파란색
+              backgroundColor: Color(0xFF1D3557),
               child: Icon(Icons.person, size: 20.0, color: Colors.white),
             ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MyPageScreen()),
-              ); // 마이페이지 화면으로 이동
+              );
             },
           ),
         ],
@@ -94,10 +110,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'Gen-Z Calendar\nmenu',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Colors.white,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             ListTile(
@@ -107,8 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const GroupManagementScreen()
-                  ),
+                      builder: (context) => const GroupManagementScreen()),
                 );
               },
             ),
@@ -149,17 +163,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      // backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 상단 캘린더
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: 700, // 캘린더 고정 높이
+            height: 700,
             child: CellCalendar(
               cellCalendarPageController: cellCalendarPageController,
+              events: _events, // Firestore에서 가져온 이벤트 전달
               daysOfTheWeekBuilder: (dayIndex) {
                 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                 return Center(
@@ -180,9 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "$month $year",
                         style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
                       IconButton(
@@ -201,14 +212,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               onCellTapped: (date) {
-                final tappedDate = date;
                 setState(() {
-                  _selectedDate = tappedDate;
+                  _selectedDate = date;
                 });
               },
             ),
           ),
-          // 드래그 가능한 BottomSection
           Positioned(
             bottom: 0,
             left: 0,
@@ -216,10 +225,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
                 setState(() {
-                  _bottomSheetHeight -= details.delta.dy; // 드래그에 따라 높이 변경
+                  _bottomSheetHeight -= details.delta.dy;
                   _bottomSheetHeight = _bottomSheetHeight.clamp(
-                    212.0, 
-                    MediaQuery.of(context).size.height * 0.8
+                    212.0,
+                    MediaQuery.of(context).size.height * 0.8,
                   );
                 });
               },
@@ -233,27 +242,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     topRight: Radius.circular(16),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [ Text(
-                          _selectedDate != null
-                              ? "선택된 날짜: ${DateFormat('MM-dd').format(_selectedDate!)}"
-                              : "날짜를 선택해주세요",
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        BottomSection(
-                          selectedDate: _selectedDate,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                child:
+                    BottomSection(selectedDate: _selectedDate, events: _events),
               ),
             ),
           ),
@@ -262,8 +252,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-      
-      
-  
-

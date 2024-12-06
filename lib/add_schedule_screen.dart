@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gen_z_calendar/repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   const AddScheduleScreen({super.key});
@@ -13,8 +13,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final TextEditingController descriptionController = TextEditingController();
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
-
-  final ScheduleRepository repository = ScheduleRepository();
 
   void _selectTime(BuildContext context, bool isStartTime) async {
     TimeOfDay? pickedTime = await showTimePicker(
@@ -33,7 +31,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  void _saveSchedule() {
+  Future<void> _saveScheduleToFirestore() async {
     if (titleController.text.isEmpty ||
         _startTime == null ||
         _endTime == null) {
@@ -50,10 +48,22 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       'startTime': _startTime!.format(context),
       'endTime': _endTime!.format(context),
       'description': descriptionController.text.trim(),
+      'date': DateTime.now().toIso8601String(), // Firestore에 저장될 날짜
     };
 
-    repository.saveScheduleLocally(newSchedule).then((_) {
-      Navigator.pop(context); // 일정 추가 완료 후 이전 화면으로 돌아감
+    FirebaseFirestore.instance
+        .collection('schedules')
+        .add(newSchedule)
+        .then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('일정이 성공적으로 저장되었습니다.')),
+      );
+      Navigator.pop(context); // 이전 화면으로 돌아감
+    }).catchError((error) {
+      print('Error saving schedule: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('일정 저장 중 오류가 발생했습니다.')),
+      );
     });
   }
 
@@ -134,7 +144,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(
-                onPressed: _saveSchedule,
+                onPressed: _saveScheduleToFirestore,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D3557),
                 ),
