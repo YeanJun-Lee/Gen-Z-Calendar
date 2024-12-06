@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -19,57 +18,47 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isChecked = false;
   String errorMessage = ''; // 에러 메시지를 표시하기 위한 변수
 
-Future<void> registerUser() async {
-  if (passwordController.text != confirmPasswordController.text) {
-    setState(() {
-      errorMessage = '비밀번호가 일치하지 않습니다.';
-    });
-    return;
+  Future<void> registerUser() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      setState(() {
+        errorMessage = '비밀번호가 일치하지 않습니다.';
+      });
+      return;
+    }
+
+    try {
+      // Firebase Authentication을 이용한 회원가입
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      // 추가 사용자 정보 저장 (ex: DisplayName)
+      await userCredential.user?.updateDisplayName(usernameController.text);
+
+      setState(() {
+        errorMessage = '회원가입 성공: ${userCredential.user?.email}';
+      });
+
+      // 회원가입 성공 후 로그인 화면으로 이동
+      Navigator.pushReplacementNamed(context, '/login');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'email-already-in-use') {
+          errorMessage = '이미 사용 중인 이메일입니다.';
+        } else if (e.code == 'weak-password') {
+          errorMessage = '비밀번호는 최소 6자 이상이어야 합니다.';
+        } else {
+          errorMessage = '오류 발생: ${e.message}';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = '오류 발생: $e';
+      });
+    }
   }
-
-  try {
-    // Firebase Authentication을 이용한 회원가입
-    UserCredential userCredential =
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
-
-    final userId = userCredential.user!.uid; // Firebase Authentication의 userId 가져오기
-
-    // Firebase Authentication의 displayName 설정
-    await userCredential.user?.updateDisplayName(usernameController.text.trim());
-
-    // Firestore에 사용자 정보 저장
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'name': usernameController.text.trim(),
-      'email': emailController.text.trim(),
-      'createdAt': FieldValue.serverTimestamp(), // 서버 타임스탬프 저장
-    });
-
-    setState(() {
-      errorMessage = '회원가입 성공: ${userCredential.user?.email}';
-    });
-
-    // 회원가입 성공 후 로그인 화면으로 이동
-    Navigator.pushReplacementNamed(context, '/login');
-  } on FirebaseAuthException catch (e) {
-    setState(() {
-      if (e.code == 'email-already-in-use') {
-        errorMessage = '이미 사용 중인 이메일입니다.';
-      } else if (e.code == 'weak-password') {
-        errorMessage = '비밀번호는 최소 6자 이상이어야 합니다.';
-      } else {
-        errorMessage = '오류 발생: ${e.message}';
-      }
-    });
-  } catch (e) {
-    setState(() {
-      errorMessage = '오류 발생: $e';
-    });
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
