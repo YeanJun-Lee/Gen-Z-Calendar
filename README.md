@@ -1,16 +1,105 @@
-# gen_z_calendar
+# Gen_Z_Calendar
+Gen-Z 세대를 위한 공유 캘린더 애플리케이션
 
-A new Flutter project.
+## 프로젝트 소개
+Gen-Z Calendar는 사용자들이 개인 및 공유 캘린더를 통해 일정을 효율적으로 관리하고, 그룹과 일정을 공유하며 자동으로 약속을 조율할 수 있는 다목적 캘린더 애플리케이션입니다. Google Calendar 연동, 사용자 친화적 UI, 일정 알림 등의 기능을 제공합니다.
 
-## Getting Started
+## 주요 기능
+1. 회원 관리
+- 회원가입 및 로그인
+- 마이페이지에서 사용자 정보 확인 및 수정
 
-This project is a starting point for a Flutter application.
+2. 개인 일정 관리
+- 일정 추가, 변경, 삭제
+- 할 일 및 반복 일정 관리
 
-A few resources to get you started if this is your first Flutter project:
+3. 공유 그룹 기능
+- 그룹 생성 및 관리
+- 그룹 멤버 초대, 삭제, 변경
+- 공유 일정 생성 및 표시
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+4. 알림 시스템
+- 중요한 일정 알림 및 변경 사항 알림
+- 개인화된 알림 방식 설정
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+5. 캘린더 동기화 및 연동
+- Google Calendar 연동
+- 실시간 동기화로 일정 변경 반영
+
+## 프로젝트 구조
+- 프론트엔드: Flutter
+- 백엔드: Firebase와 Google Calendar API
+- 데이터베이스: MySQL
+- 지원 플랫폼: Android, iOS
+
+## 화면 구성
+![UI 구성도](첨부된 이미지 링크)
+
+1. 스플래시 화면  
+    앱 실행 시 로고가 표시되는 화면.
+
+2. 로그인 및 회원가입 화면  
+    사용자가 계정을 생성하거나 로그인할 수 있는 화면.
+
+3. 홈 화면(캘린더)  
+    개인 및 공유 일정을 한눈에 확인 가능.
+    상단 메뉴바 및 하단 네비게이션바를 통해 다른 기능으로 이동 가능.
+
+4. 그룹 관리 화면  
+    그룹 생성 및 초대.
+    그룹에 속한 멤버 확인 및 관리.
+
+5. 일정 추가 및 관리 화면  
+    일정을 추가하거나 변경 가능.
+    시간과 날짜 선택 기능 제공.
+
+6. 알림 화면  
+    그룹 초대 및 일정 변경 알림 확인 가능.
+
+7. 마이페이지  
+    사용자 정보 및 설정을 확인하고 변경 가능.
+
+## 요구사항
+1. 기능적 요구사항
+- 일정 추가, 수정, 삭제
+- 그룹 일정 자동 조율 및 알림
+- 데이터 동기화 및 실시간 업데이트
+
+2. 비기능적 요구사항
+- 빠른 응답 속도
+- 보안 강화
+- 다양한 운영체제와 기기에서의 호환성
+
+## 기술 스택
+- 언어: Dart
+- 프레임워크: Flutter
+- 백엔드: Firebase
+- API: Google Calendar API
+- 툴: Android Studio, Xcode, Visual Studio Code
+
+## 설치 및 실행 방법
+1. Flutter 설치
+    Flutter SDK를 [공식 사이트](https://docs.flutter.dev/get-started/install)에서 다운로드합니다.
+
+2. 프로젝트 복제
+
+```
+    git clone https://github.com/YeanJun-Lee/Gen-Z-Calendar.git
+    cd Gen-Z-Calendar
+```
+
+3. 의존성 설치  
+```
+    flutter pub get
+```
+
+4. 에뮬레이터 실행  
+```
+    flutter run
+```
+
+## 팀구성
+- 김소진: UI/UX 설계
+- 이준용: 프론트엔드 개발
+- 채희석: 데이터베이스 설계 및 API 연동
+- 이연준: 프론트엔드 개발, 프로젝트 매니저
