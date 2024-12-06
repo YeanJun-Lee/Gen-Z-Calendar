@@ -121,7 +121,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   // 일정 알림
                   final notification = scheduleNotifications[index];
                   return ListTile(
-                    leading: const Icon(Icons.notifications, color: Colors.orange),
+                    leading:
+                        const Icon(Icons.notifications, color: Colors.orange),
                     title: Text(
                       notification['content']!,
                       style: const TextStyle(fontSize: 14.0), // 목록 글씨 크기 조정

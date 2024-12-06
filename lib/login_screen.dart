@@ -13,9 +13,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   String errorMessage = ''; // 오류 메시지를 저장하는 변수
+  bool isLoading = false; // 로딩 상태 
 
   // 로그인 함수
   Future<void> login() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       String email = emailController.text.trim();
       String password = passwordController.text.trim();
@@ -26,11 +30,26 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
+      if (mounted) {
       // 로그인 성공 시 홈 화면으로 이동
       Navigator.pushReplacementNamed(context, '/home');
+      }
     } on FirebaseAuthException catch (e) {
       // Firebase 로그인 오류 처리
       setState(() {
+        switch (e.code) {
+          case 'user_not_found':
+            errorMessage = '등록되지 않은 이메일입니다.';
+            break;
+          case 'wrong_password':
+            errorMessage = '비밀번호가 올바르지 않습니다. ';
+            break;
+          case 'empth-fields':
+            errorMessage = e.message!;
+            break;
+          defalut:
+            errorMessage = '오류 발생: ${e.message}';
+        }
         if (e.code == 'user-not-found') {
           errorMessage = '등록되지 않은 이메일입니다.';
         } else if (e.code == 'wrong-password') {
@@ -41,7 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } catch (e) {
       setState(() {
-        errorMessage = '오류 발생: $e';
+        errorMessage = '예기치 않은 오류가 발생했습니다. ';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }

@@ -16,13 +16,19 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  bool isChecked = false;
+  bool isChecked = false; // 약관 동의 상태
+  bool isLoading = false; // 로딩 상태
   String errorMessage = ''; // 에러 메시지를 표시하기 위한 변수
 
   Future<void> registerUser() async {
+    setState(() {
+      isLoading = true; // 로딩 시작
+    });
+
     if (passwordController.text != confirmPasswordController.text) {
       setState(() {
         errorMessage = '비밀번호가 일치하지 않습니다.';
+        isLoading = false; // 로딩 종료
       });
       return;
     }
@@ -68,6 +74,10 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e) {
       setState(() {
         errorMessage = '오류 발생: $e';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }

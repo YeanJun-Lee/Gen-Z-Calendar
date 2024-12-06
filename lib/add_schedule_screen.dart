@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:gen_z_calendar/repository.dart';
 
 class AddScheduleScreen extends StatefulWidget {
   const AddScheduleScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _AddScheduleScreenState createState() => _AddScheduleScreenState();
 }
 
 class _AddScheduleScreenState extends State<AddScheduleScreen> {
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
+
+  final ScheduleRepository repository = ScheduleRepository();
 
   void _selectTime(BuildContext context, bool isStartTime) async {
     TimeOfDay? pickedTime = await showTimePicker(
@@ -29,26 +33,28 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  void _showSuccessDialog(BuildContext context) {
-    // 알림창 표시
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('일정 추가'),
-          content: const Text('일정이 추가되었습니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // 팝업 닫기
-                Navigator.pop(context); // 일정 추가 화면 닫고 홈 화면으로 이동
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
+  void _saveSchedule() {
+    if (titleController.text.isEmpty ||
+        _startTime == null ||
+        _endTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('모든 필드를 올바르게 입력해주세요.'),
+        ),
+      );
+      return;
+    }
+
+    final newSchedule = {
+      'title': titleController.text.trim(),
+      'startTime': _startTime!.format(context),
+      'endTime': _endTime!.format(context),
+      'description': descriptionController.text.trim(),
+    };
+
+    repository.saveScheduleLocally(newSchedule).then((_) {
+      Navigator.pop(context); // 일정 추가 완료 후 이전 화면으로 돌아감
+    });
   }
 
   @override
@@ -59,34 +65,29 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           '일정 추가',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // 이전 화면으로 이동
+            Navigator.pop(context);
           },
         ),
-        backgroundColor: Colors.white,
-        elevation: 0, // 그림자 제거
+        elevation: 0,
       ),
-      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 제목 입력
               TextField(
-                decoration: InputDecoration(
+                controller: titleController,
+                decoration: const InputDecoration(
                   labelText: '제목',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
+                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16.0),
-
-              // 시간 및 날짜 설정
               Row(
                 children: [
                   Expanded(
@@ -95,14 +96,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                       decoration: InputDecoration(
                         labelText: '시작 시간',
                         prefixIcon: const Icon(Icons.access_time),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+                        border: OutlineInputBorder(),
                       ),
                       controller: TextEditingController(
-                        text: _startTime != null
-                            ? _startTime!.format(context)
-                            : '',
+                        text: _startTime?.format(context) ?? '',
                       ),
                       onTap: () => _selectTime(context, true),
                     ),
@@ -116,12 +113,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                       decoration: InputDecoration(
                         labelText: '종료 시간',
                         prefixIcon: const Icon(Icons.access_time),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+                        border: OutlineInputBorder(),
                       ),
                       controller: TextEditingController(
-                        text: _endTime != null ? _endTime!.format(context) : '',
+                        text: _endTime?.format(context) ?? '',
                       ),
                       onTap: () => _selectTime(context, false),
                     ),
@@ -129,65 +124,19 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                 ],
               ),
               const SizedBox(height: 16.0),
-
-              // 참가자 추가
               TextField(
-                decoration: InputDecoration(
-                  labelText: '참가자',
-                  prefixIcon: const Icon(Icons.person),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              // 회의 도구 입력
-              TextField(
-                decoration: InputDecoration(
-                  labelText: '회의 도구',
-                  prefixIcon: const Icon(Icons.videocam),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              // 위치 입력
-              TextField(
-                decoration: InputDecoration(
-                  labelText: '위치',
-                  prefixIcon: const Icon(Icons.location_on),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              // 설명 입력
-              TextField(
-                maxLines: 5,
-                decoration: InputDecoration(
+                controller: descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(
                   labelText: '설명',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
+                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 24.0),
-
-              // 완료 버튼
               ElevatedButton(
-                onPressed: () {
-                  _showSuccessDialog(context); // 팝업창 띄우기
-                },
+                onPressed: _saveSchedule,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D3557),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
                 ),
                 child: const Text('완료', style: TextStyle(color: Colors.white)),
               ),
